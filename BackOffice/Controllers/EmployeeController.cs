@@ -20,7 +20,7 @@ namespace BackOffice.Controllers
             DBContext = dBContext;
         }
         
-        [Cache(10)]
+        [Cache(20)]
         public async Task<ActionResult<IEnumerable<Employee>>> Get()
         {
             // var employee = await DBContext.Employee.Include(x=>x.Department).ToListAsync();

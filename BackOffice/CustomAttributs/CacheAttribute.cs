@@ -7,6 +7,7 @@ using BackOffice.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BackOffice.CustomAttributes
@@ -23,8 +24,17 @@ namespace BackOffice.CustomAttributes
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            var configurationSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
             var cacheKey = GenerateCacheKeyFromRequest(context.HttpContext.Request);
+
+            var redisEnable = Convert.ToBoolean(configurationSettings.GetSection("RedisConfig").GetSection("Enable").Value);
+            
+            if (!redisEnable)
+            {
+                await next();
+                return;
+            }
 
             // check if data available in cache and return from cache
             var cachedResponse = await cacheService.GetCacheResponseAsync(cacheKey);
